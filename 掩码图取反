@@ -1,0 +1,35 @@
+import numpy as np
+import cv2
+from PIL import Image
+import matplotlib.pyplot as plt
+import os
+img = cv2.imread("C:/data/mask/2.bmp")
+# cv2.imshow("image", img) # 显示读取图片
+# cv2.waitKey(0) #按键0
+# print(type(img))  #显示类型
+# print('尺寸',img.shape)  #显示尺寸
+# print('图片宽度',img.shape[0])  #图片宽度0
+# print('图片高度',img.shape[1])  #图片高度
+# print('图片通道数',img.shape[2])  #图片通道数
+# print('总像素个数',img.size)   #显示总像素个数
+# print('最大像素值',img.max())  #最大像素值
+# print('最小像素值',img.min())  #最小像素值
+# print('像素平均值',img.mean()) #像素平均值
+img_np = np.array(img)  # 找出数组里的最大值，然后归一化
+shape = np.shape(img_np)
+print('shape', shape)
+img_np1 = np.ones(shape) - img_np
+cv2.imshow("image2", img_np1)
+cv2.waitKey(0) #等待按键0
+img_np1 = img_np1 * 255
+cv2.imwrite("C:/data/mask1/2.bmp", img_np1) # 保存图像文件
+
+# print(type(img_np1))  #显示类型
+# print('尺寸',img_np1.shape)  #显示尺寸
+# print('图片宽度',img_np1.shape[0])  #图片宽度0
+# print('图片高度',img_np1.shape[1])  #图片高度
+# print('图片通道数',img_np1.shape[2])  #图片通道数0
+# print('总像素个数',img_np1.size)   #显示总像素个数
+# print('最大像素值',img_np1.max())  #最大像素值
+# print('最小像素值',img_np1.min())  #最小像素值
+# print('像素平均值',img_np1.mean()) #像素平均值
