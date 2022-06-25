@@ -1,0 +1,101 @@
+clear;
+close all;
+
+folder = 'Train';
+savepath='E:/SeAFusion-main/h5/save/trainvi_po.h5';
+size_input=84;%输入图像矩阵 DDCGAN需要84 
+stride=21; %间隔
+Format='*.bmp';
+img_ch=1; %图像通道：1 为灰色，3 为 RGB
+ratio=1; % >1:  % >1：如果要调整源图像的大小以扩大训练数据的数量
+
+% %初始化
+data=zeros(size_input,size_input,1,1);
+
+folder1='E:/SeAFusion-main/h5/train_vi/';
+filepath1=dir(fullfile(folder1,'*.bmp'));
+folder2='E:/SeAFusion-main/h5/train_po/';
+filepath2=dir(fullfile(folder2,'*.bmp'));
+
+count=0;
+L1=length(filepath1);
+L2=length(filepath2);
+L=min([L1,L2]);
+
+tic
+for i=1:L
+%     fullfile(folder1,filepath1(i).name)
+%     dir(fullfile(folder1,filepath1(i).name))
+    img1 = imread((fullfile(folder1,filepath1(i).name)));
+    img2 = imread((fullfile(folder2,filepath2(i).name)));
+    
+    [height,width,img_chl]=size(img1);
+    img1_double(:,:,1)=im2double(img1(:,:,1));
+    img2_double(:,:,1)=im2double(img2(:,:,1));    
+    i1(:,:,1)=imresize(img1_double(:,:,1),[fix(height*ratio),fix(width*ratio)]);
+    i2(:,:,1)=imresize(img2_double(:,:,1),[fix(height*ratio),fix(width*ratio)]);      
+    
+    clear img1 img2
+
+
+    [height,width,channel]=size(i1);
+   
+    for x=1:stride:(height-size_input+1)
+        for y=1:stride:(width-size_input+1)    
+            sub_img1(:,:,:)=i1(x:x+size_input-1,y:y+size_input-1,:);
+            sub_img2(:,:,:)=i2(x:x+size_input-1,y:y+size_input-1,:);
+            count=count+1;
+            data(:,:,1:1+img_ch-1,count)=sub_img1(:,:,:);
+            data(:,:,1+img_ch:1+2*img_ch-1,count)=sub_img2(:,:,:);
+           
+%%  通过垂直和水平方向翻转来创建更多的训练数据
+            count=count+1;
+            for c=1:channel
+                sub_img11(:,:,c)=flipud(sub_img1(:,:,c));
+                sub_img21(:,:,c)=flipud(sub_img2(:,:,c));
+            end
+            data(:,:,1:1+img_ch-1,count)=sub_img11(:,:,:);
+            data(:,:,1+img_ch:1+2*img_ch-1,count)=sub_img21(:,:,:);
+            
+            count=count+1;
+            for c=1:channel
+                sub_img12(:,:,c)=fliplr(sub_img1(:,:,c));
+                sub_img22(:,:,c)=fliplr(sub_img2(:,:,c));
+            end
+            data(:,:,1:1+img_ch-1,count)=sub_img12(:,:,:);
+            data(:,:,1+img_ch:1+2*img_ch-1,count)=sub_img22(:,:,:);      
+
+            figure(1)
+            A=data(:,:,1:1+img_ch-1,count);
+            B=data(:,:,1+img_ch:1+2*img_ch-1,count);
+            subplot(221),imshow(A);
+            subplot(222),imshow(B);
+            subplot(223),imshow(sub_img1);
+            subplot(224),imshow(sub_img2);
+        end
+    end
+      
+    if mod(i,10)==0
+        i
+        toc
+    end
+    clear i1 i2 img1_double img2_double
+end
+
+order=randperm(count);
+data=data(:,:,:,order);
+% writing to从训练图像中挑选
+chunksz=128;
+totalct=0;
+create_flag=true;
+
+for batch_num=1:floor(count/chunksz)
+    lastread=(batch_num-1)*chunksz;
+    batch_data=data(:,:,:,lastread+1:lastread+chunksz);
+    startloc=struct('dat',[1,1,1,totalct+1]);
+    if batch_num~=1
+        create_flag= false;
+    end
+    curr_dat_sz=store2hdf5(savepath,batch_data,create_flag,startloc,chunksz);
+    totalct=curr_dat_sz(end);
+end
