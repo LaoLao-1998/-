@@ -22,3 +22,8 @@ print(model)
 
 summary(model, input_size=(3,2566,256)) #summary(your_model, input_size=(channels, H, W))
 
+#
+#info 分析
+#每一层的类型、shape 和 参数量
+#模型整体的参数量
+#模型大小，和 fp/bp 一次需要的内存大小，可以用来估计最佳 batch_size
