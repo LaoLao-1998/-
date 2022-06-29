@@ -99,3 +99,5 @@ for batch_num=1:floor(count/chunksz)
     curr_dat_sz=store2hdf5(savepath,batch_data,create_flag,startloc,chunksz);
     totalct=curr_dat_sz(end);
 end
+
+%得有store2hdf5.m文件，在百度网盘中或者DDCGAN -creath5处
