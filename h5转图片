@@ -38,7 +38,7 @@ if __name__ == '__main__':
         vi_image = np.uint8(vi_image * 255)
         ir_image = np.uint8(ir_image * 255)
         # vi_image = cv2.cvtColor(vi_image, cv2.COLOR_BGR2BGRA)
-        vi_image = cv2.cvtColor(vi_image, cv2.COLOR_GRAY2BGR)
+        vi_image = cv2.cvtColor(vi_image, cv2.COLOR_GRAY2BGR) #不知道这里会不会出现问题
 
         cv2.imwrite(os.path.join(vis_dir, f'{index}.bmp'), vi_image)
         cv2.imwrite(os.path.join(Inf_dir, f'{index}.bmp'), ir_image)
